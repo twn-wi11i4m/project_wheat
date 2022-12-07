@@ -1,142 +1,166 @@
 from util import *
+from data_source import *
 
-source_data = {
-    'Hail Endorsement Rate': 1.92,
-    'Spring Insured Price': 8.71,
-    'Your Normal (Risk Area 4)':{
-        'Fallow':{
-            '50% Cover Level':{
-                'Yield Guarantee': 15.9,
-                'Dollars Liability': 138.72,
-                'Crop Insurance Premium Per Acre': 2,
-                'Hail Premium Per Acre': 0,
-                'Total Premium Per Acre': 2
-            },
-            '60% Cover Level':{
-                'Yield Guarantee': 19.1,
-                'Dollars Liability': 166.46,
-                'Crop Insurance Premium Per Acre': 4.39,
-                'Hail Premium Per Acre': 3.2,
-                'Total Premium Per Acre': 7.59
-            },
-            '70% Cover Level':{
-                'Yield Guarantee': 22.3,
-                'Dollars Liability': 194.21,
-                'Crop Insurance Premium Per Acre': 7.46,
-                'Hail Premium Per Acre': 3.73,
-                'Total Premium Per Acre': 11.19
-            },
-            '80% Cover Level':{
-                'Yield Guarantee': 25.5,
-                'Dollars Liability': 221.95,
-                'Crop Insurance Premium Per Acre': 11.9,
-                'Hail Premium Per Acre': 4.26,
-                'Total Premium Per Acre': 16.16
-            },
-        },
-        'Stubble':{
-            '50% Cover Level':{
-                'Yield Guarantee': 12.6,
-                'Dollars Liability': 109.76,
-                'Crop Insurance Premium Per Acre': 2.38,
-                'Hail Premium Per Acre': 0,
-                'Total Premium Per Acre': 2.38
-            },
-            '60% Cover Level':{
-                'Yield Guarantee': 15.1,
-                'Dollars Liability': 131.71,
-                'Crop Insurance Premium Per Acre': 4.58,
-                'Hail Premium Per Acre': 2.53,
-                'Total Premium Per Acre': 7.11
-            },
-            '70% Cover Level':{
-                'Yield Guarantee': 17.6,
-                'Dollars Liability': 153.66,
-                'Crop Insurance Premium Per Acre': 7.31,
-                'Hail Premium Per Acre': 2.95,
-                'Total Premium Per Acre': 10.26
-            },
-            '80% Cover Level':{
-                'Yield Guarantee': 20.2,
-                'Dollars Liability': 175.62,
-                'Crop Insurance Premium Per Acre': 11.13,
-                'Hail Premium Per Acre': 3.37,
-                'Total Premium Per Acre': 14.50
-            },
-        },
-        'Irrigated':{
-            '50% Cover Level':{
-                'Yield Guarantee': 41.1,
-                'Dollars Liability': 357.76,
-                'Crop Insurance Premium Per Acre': 1.25,
-                'Hail Premium Per Acre': 0,
-                'Total Premium Per Acre': 1.25
-            },
-            '60% Cover Level':{
-                'Yield Guarantee': 49.3,
-                'Dollars Liability': 429.31,
-                'Crop Insurance Premium Per Acre': 2.75,
-                'Hail Premium Per Acre': 8.24,
-                'Total Premium Per Acre': 10.99
-            },
-            '70% Cover Level':{
-                'Yield Guarantee': 57.5,
-                'Dollars Liability': 500.86,
-                'Crop Insurance Premium Per Acre': 4.21,
-                'Hail Premium Per Acre': 9.62,
-                'Total Premium Per Acre': 13.83
-            },
-            '80% Cover Level':{
-                'Yield Guarantee': 65.7,
-                'Dollars Liability': 572.42,
-                'Crop Insurance Premium Per Acre': 6.41,
-                'Hail Premium Per Acre': 10.99,
-                'Total Premium Per Acre': 17.4
-            },
+
+
+class AgriInsurance:
+    spring_price = {
+        'canolapolish':16.33,
+        'canolaargentine':16.33,
+        'CPS':8.44,
+        'HRS':8.71
         }
-    }
-}
+    number_of_crops = 0
 
-class AgriInsuranc:
-    def __init__(self, expected_yield_level, cover_level:int, risk_area:int) -> None:
-        self.expected_yield_level = expected_yield_level    # fallow, stubble, or irrigated
-        self.cover_level = cover_level  # the % of cover level
-        self.risk_area = risk_area
-        self.hail_endorsement_rate = source_data['Hail Endorsement Rate']
-        self.spring_insured_price = source_data['Spring Insured Price']
-        
-        insurance_detail = source_data[f'Your Normal (Risk Area {self.risk_area})'][self.expected_yield_level][f"{cover_level}% Cover Level"]
-        self.yield_guarantee = insurance_detail['Yield Guarantee']
-        self.dollars_liability = insurance_detail['Dollars Liability']
-        self.crop_insurance_premium_per_acre = insurance_detail['Crop Insurance Premium Per Acre']
-        self.hail_premium_per_acre = insurance_detail['Hail Premium Per Acre']
-        self.total_premium_per_acre = insurance_detail['Total Premium Per Acre']
+    #initiate class with instance variables: 
+    def __init__(self, farm:object, insured_acres:int, crop, field, coverage, include_hail_endorsement:bool) -> None:
+        self.farm = farm    #pass in farm 
+        self.insured_acres = insured_acres  #insured_acres: how many acres of crop being insured 
+        self.crop = crop#crop: either 'canolapolish', 'canolaargentine', 'CPS', 'HRS'
+        self.field = field #field: either "stubble" stubble, "fallow" fallow, or "irrigated" irrigated
+        self.coverage = coverage #coverage: either 50, 60, 70 or 80 (percent)
+        self.include_hail_endorsement = include_hail_endorsement #include_hail_endorsement: True if yes, False if no
+        AgriInsurance.number_of_crops += 1
+        self.base_rate_data = BaseRateData()
+        self.yield_data = YieldData()
+        self.premium_date = PremiumData()
 
-    def indemnity_payment(self, actual_yield):
-        """
-        calculate the indemnity payment per Acre
-
-        :param actual_yield: The actual yield per Acre
+    def get_base_rate(self):
+        base_rate = self.base_rate_data.get_base_rate(
+            township=self.farm.township,
+            range=self.farm.range,
+            meridian=self.farm.meridian
+        )
+        return base_rate
     
-        """
-        payment = max((self.yield_guarantee - actual_yield) * self.spring_insured_price, 0)
-        return payment
-    
-    @property
-    def monthly_premium(self) -> float:
-        """
-        calculate the monthly premium per Acre
-        """
-        total_premium = self.total_premium_per_acre
+    #Method retrives the AFSC yield estimate for the passed in risk area and crop
+    #from data in yield.csv
+    def get_yield_estimate(self):
+        crop_yield_estimate = self.yield_data.get_yield_estimate(
+            risk_area=self.farm.risk_area,
+            crop=self.crop,
+            field=self.field
+        )
+        return crop_yield_estimate
+
+     # method calculates per acre dollar liability 
+    def get_dollars_liability(self): 
+        #liability = spring insured price x coverage level x normal expected yield
+        dollars_liability = round(
+            self.spring_price[self.crop] * self.coverage/100 * self.get_yield_estimate(), 
+            2
+        )
+        return dollars_liability
+
+    # gets the total farm dollar liability 
+    def get_total_liability(self): 
+        total_liability = self.get_dollars_liability() * self.insured_acres 
+        return total_liability
+
+    #method gets the subsidized hail endorsement rate 
+    def get_hail_endorsement_rate(self):
+        base_rate = self.get_base_rate()
+        #if elect for hail endorsement and coverage level is greater than 50%
+        if self.include_hail_endorsement and self.coverage > 50:
+            if self.crop == "canolapolish" or self.crop == "canolaargentine": 
+                hail_endorsement_rate = round(.383 * 1.5 * base_rate, 2) 
+            elif self.crop == "peas":
+                hail_endorsement_rate = round(.383 * 1.75 * base_rate, 2)
+            else: 
+                hail_endorsement_rate = round(.383 * base_rate, 2) 
+        else: 
+            hail_endorsement_rate = 0 
+        return hail_endorsement_rate
+
+    #method gets the per acre hail endorsement premium
+    def get_per_acre_hail_endorsement_premium(self):
+        #hail endorsement premium = dollars liability x hail endorsement rate
+        hail_endorsement_premium = round(
+            self.get_dollars_liability() * self.get_hail_endorsement_rate()/100,
+            2
+        )
+        return hail_endorsement_premium
+
+    #method gets total farm hail endorsement premium 
+    def get_total_hail_endorsement_premium(self):
+        #total hail endorsement premium = hail endorsement premium x insured acres 
+        total_hail_endorsement_premium = self.get_per_acre_hail_endorsement_premium() * self.insured_acres
+        return total_hail_endorsement_premium
+
+    #method retrieves the risk area crop premium as a percentage
+    def get_crop_premium_percent(self): 
+        percent_premium = self.premium_date.get_crop_premium_percentage(
+            risk_area=self.farm.risk_area,
+            crop=self.crop,
+            field=self.field,
+            coverage=self.coverage)
+        return percent_premium
+
+    #method retrieves the risk area crop premium as a dollar amount per acre
+    def get_per_acre_crop_premium(self):
+        crop_premium = round(
+            self.get_crop_premium_percent()/100 * self.get_dollars_liability(),
+            2
+        )
+        return crop_premium
+
+    #method retrieves the total crop premium as a dollar amount for all acres insured
+    def get_total_crop_premium(self): 
+        total_crop_premium = self.get_per_acre_crop_premium()*self.insured_acres
+        return total_crop_premium
+
+    #method retrieves the total premium per acre (crop premium + hail endorsement premium)
+    def get_total_premium_per_acre(self): 
+        acre_total_premium = round(
+            self.get_per_acre_crop_premium() + self.get_per_acre_hail_endorsement_premium(),
+            2
+        )
+        return acre_total_premium
+
+    #method retrieves the total premium paid per farm for both crop insurance and hail endorsement
+    def get_total_premium(self):
+        total_premium = self.get_total_premium_per_acre() * self.insured_acres
         return total_premium
 
-    def premium_pay_date(self, adate) -> bool:
+    #calculate yield guarantee under specified coverage level, given expected yield
+    def get_yield_guarantee(self): 
+        yield_guarantee = self.get_yield_estimate() * self.coverage / 100 
+        return yield_guarantee
+
+    #calculates the total indemnity payment, method gets called by passing in final yield
+    def calc_indemnity(self, y):
+        guarantee = self.get_yield_guarantee() 
+        if guarantee > y: 
+            payment = round(
+                (guarantee - y) * self.spring_price[self.crop] * self.insured_acres,
+                2
+            )
+            print(f"Yield of {y} bu/acre is less than yield guarantee of {guarantee} bu/acre, thus insurance payment of ${payment} received" "\n")
+        else: 
+            payment = 0
+            print(f"Yield of {y} bu/acre is higher than yield guarantee of {guarantee} bu/acre, thus no indemnity payment received" "\n")
+        return payment 
+
+    def get_insurance_information(self): 
+        print(f"Insurance information for {self.insured_acres} acres of {self.crop} at {self.coverage}% coverage:")
+        print(f"Farm Location: mer {self.farm.meridian}, twn {self.farm.township}, rng {self.farm.range}, RA {self.farm.risk_area}")
+        if self.hail_endorsement == "Y":
+            print("Farmer has elected for crop insurance with hail endorsement")
+        else:
+            print("Farmer has elected for crop insurance WITHOUT hail endorsement")
+        print(f"The farmers estimated yield is: {self.get_yield_estimate()} bushels/acre, and yield guarantee is: {self.get_yield_guarantee()} bushels/acre")
+        print(f"The farmers per/acre premium is: ${self.get_total_premium_per_acre()} and total premium is: ${self.get_total_premium()}" "\n")
+
+    def is_premium_pay_date(self, adate) -> bool:
         """
-        Assume the premium paid at the end month. Determine adate is the premium_pay_date
-        
+        Assume the premium is paid at the end of month. Determine adate is the premium_pay_date
+
         :return bool: is need to pay premium
         """
-        is_pay_premium = is_end_of_month(adate)
+        is_pay_premium = is_end_of_month(adate=adate)
         return is_pay_premium
 
-
+    #calculates the number of crops being insured
+    @classmethod
+    def num_of_crops(cls):
+        return cls.number_of_crops

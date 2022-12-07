@@ -1,11 +1,12 @@
-from farmer import Farmer
+from farmer import Farmer, Farm
 from util import *
 from agriculture_products import Wheat, Canola
 # from constant import *
 from plot_wealth import *
 
 def appraoch_1():
-    farmer = Farmer(initial_cash=100_000, farm_area=1, risk_area=4)
+    farm = Farm(township=1, range=1, meridian=5, farm_area=1)
+    farmer = Farmer(initial_cash=100_000, farm=farm)
     farmer.cost = {
                 'Operational Cost': {
                     'Seed Treatment':34,

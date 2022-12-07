@@ -240,6 +240,23 @@ class Wheat:
         y = self.data[self.year][f"Risk Area {self.risk_area}"]
         return y
 
+class WheatYears:
+    def __init__(self, years:list, risk_area:int) -> None:
+        self.years_list = [years] if isinstance(years, str) else years
+        self.risk_area = risk_area
+        self.data = wheat_source_data
+    
+    def set_year(self, year):
+        self.year = year
+    
+    def harvest(self)-> int:
+        """
+        return the average wheat yield (Bu/Acre)
+        """
+        y = self.data[self.year][f"Risk Area {self.risk_area}"]
+        return y
+        
+
 class Canola:
     def __init__(self, year:str, risk_area:int) -> None:
         self.year = year

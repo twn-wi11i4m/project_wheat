@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+from util import get_datelist
 
 class FinancialProduct:
     def __init__(self, invest_capital, initial_date, final_payoff_date) -> None:
@@ -10,9 +13,29 @@ class FinancialProduct:
         assume there is some return, i.e., 5% of invest capital
         The dollar is including the management fee and other operational cost in KOI
         """
-        return max(self.invest_capital * (1 + 0.05), 0)
+        # return max(self.invest_capital * (1 + 0.05), 0)
+        return max(self.account_tradelog.as_of_date_balance.iloc[-1], 0)
+
+    def _get_daily_return(self, date_list:list) -> pd.Series:
+        np.random.seed(42)
+        fake_daily_return =  (np.random.random(len(date_list))-0.5)/10
+        return pd.Series(index=date_list, data=fake_daily_return, name='daily_return')
+
+    @property
+    def account_tradelog(self) -> pd.DataFrame:
+        date_list = get_datelist(self.initial_date, self.final_payoff_date)
+        tradelog = pd.DataFrame(
+            index=date_list
+        )
+        tradelog['initial_capital'] = self.invest_capital
+        tradelog['daily_return'] = self._get_daily_return(date_list)
+        tradelog['total_return'] = tradelog['daily_return'].cumsum()
+        tradelog['as_of_date_balance'] = tradelog['initial_capital'] * (1 + tradelog['total_return'])
+        return tradelog
 
 
 
-
+if __name__ == '__main__':
+    financial_product = FinancialProduct(100, '2020-01-01', '2020-05-04')
+    financial_product.account_tradelog()()
 

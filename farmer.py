@@ -1,19 +1,41 @@
 import pandas as pd
 from constant import *
-from market_price import MarketData
+from data_source import MarketData, BaseRateData
 from util import *
 
+#Class for Farm
+class Farm: 
+    #initiate class with instance variables: 
+    def __init__(self, township=1, range=1, meridian=5, farm_area=1) -> None:
+        self.township = township #farm township 
+        self.range = range #farm range 
+        self.meridian = meridian #farm meridian 
+        #based on passed in township, range, and meridian, and data from baserate.csv 
+        self.risk_area = BaseRateData().get_risk_area(township=township, range=range, meridian=meridian) #farm risk area
+        self.farm_area = farm_area
+
+    #Method prints out all of the farm information
+    def get_farm_information(self) -> None: 
+        print("Farm Information: ")
+        print(f"Farm Meridian, Township, Range: {self.meridian},{self.township},{self.range}")
+        print(f"Farm Risk Area: {self.risk_area}")
+        print(f"Farm Area: {self.farm_area}")
+        print('')
+
 class Farmer:
-    def __init__(self, initial_cash=100_000, farm_area=1, risk_area=4) -> None:
+    def __init__(self, initial_cash=100_000, farm=Farm()) -> None:
         self.initial_cash = initial_cash
         # self.cash = self.initial_cash
-        self.farm_area = farm_area
-        self.risk_area = risk_area
+        self.farm_area = farm.farm_area
+        self.risk_area = farm.risk_area
         self.crop = None
         self.insurance = None
-        self.financial_product = None
+        self.financial_products = dict()
+        self.financial_account = pd.DataFrame()
         self.crop_inventory = 0
-        self.transaction_list = []
+        self.cash_transaction_list = []
+        # self.asset_transaction_list = []
+
         self.last_sell_crop_revenue = 0
         # self.cost unit: $/Acre
         self.cost_detail = {
@@ -40,12 +62,15 @@ class Farmer:
     
     def set_adate(self, date:str) -> None:
         self.adate = date
+        self.year = self.adate.split('-')[0]
+        if self.year not in self.financial_products:
+            self.financial_products[self.year] = None
     
     def apply_AgriInsurance(self, insurance:object) -> None:
         self.insurance = insurance
 
-    def apply_FinancialProduct(self, financial_product:object) -> None:
-        self.financial_product = financial_product
+    def add_FinancialProduct(self, financial_product:object) -> None:
+        self.financial_products[self.year] = financial_product
 
     def plant_crop(self, crop:object) -> None:
         self.crop = crop
@@ -79,7 +104,7 @@ class Farmer:
         return total_yield
 
     def cash_paid(self, transaction_type, amount) -> None:
-        self.transaction_list.append(
+        self.cash_transaction_list.append(
             {
                 'Date':self.adate,
                 'cash flow': 'paid',
@@ -89,7 +114,7 @@ class Farmer:
         )
 
     def cash_received(self, transaction_type, amount) -> None:
-        self.transaction_list.append(
+        self.cash_transaction_list.append(
             {
                 'Date':self.adate,
                 'cash flow': 'received',
@@ -98,9 +123,32 @@ class Farmer:
             }
         )
 
+    # def asset_gain(self, transaction_type, amount) -> None:
+    #     self.asset_transaction_list.append(
+    #         {
+    #             'Date':self.adate,
+    #             'cash flow': 'gain',
+    #             'transaction type': transaction_type,
+    #             'amount': amount
+    #         }
+    #     )
+       
+    # def asset_lose(self, transaction_type, amount) -> None:
+    #      self.asset_transaction_list.append(
+    #         {
+    #             'Date':self.adate,
+    #             'cash flow': 'lose',
+    #             'transaction type': transaction_type,
+    #             'amount': amount
+    #         }
+    #     )
+
+
+
+
     @property
     def cash(self) -> float:
-        transactions_list = list(map(lambda x: (-1 if x['cash flow'] == 'paid' else 1) * (x['amount']), self.transaction_list))
+        transactions_list = list(map(lambda x: (-1 if x['cash flow'] == 'paid' else 1) * (x['amount']), self.cash_transaction_list))
         cash_list = [self.initial_cash] + transactions_list
         return sum(cash_list)
 
