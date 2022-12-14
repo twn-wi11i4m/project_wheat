@@ -90,16 +90,26 @@ def plot_wealth(farmer, date_list:list, res_path:str, title:str, sub_title:str):
     fig.write_html(os.path.join(res_path, f'farmer_{title}_{date_list[0]}_{date_list[-1]}_wealth.html'))
     return fig
 
-def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:str, ) -> None:
+def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:str, benchmark_farmer=None) -> None:
+    if benchmark_farmer is not None:
+        benchmark_cash_transaction_list = benchmark_farmer.cash_transaction_list
+        benchmark_wealth_df = initial_wealth_df(benchmark_farmer, date_list)
+        benchmark_wealth_df = add_transaction_in_wealth_df(benchmark_wealth_df, benchmark_cash_transaction_list)
+        benchmark_wealth_df = add_financial_account_balance_in_wealth_df(benchmark_wealth_df, benchmark_farmer.financial_products)
     cash_transaction_list = farmer.cash_transaction_list
     wealth_df = initial_wealth_df(farmer, date_list)
     wealth_df = add_transaction_in_wealth_df(wealth_df, cash_transaction_list)
     wealth_df = add_financial_account_balance_in_wealth_df(wealth_df, farmer.financial_products)
+    
     start_date, end_date = date_list[0], date_list[-1]
     whole_price_df = MarketData().price_df
     price_df = whole_price_df.loc[(whole_price_df.index >= start_date) & (whole_price_df.index <= end_date)]
     price_df.index.name = None
 
+    if benchmark_farmer is not None:
+        benchmark_portfolio_df = benchmark_wealth_df.copy()
+        # benchmark_portfolio_df['Alberta spot price'] = price_df['Alberta']
+        benchmark_portfolio_df.ffill(inplace=True)
     portfolio_df = wealth_df.copy()
     portfolio_df['Alberta spot price'] = price_df['Alberta']
     portfolio_df.ffill(inplace=True)
@@ -139,6 +149,18 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
             }
         )
     )
+    if benchmark_farmer is not None:
+        fig.add_trace(
+            go.Scatter(
+                x=benchmark_portfolio_df.index,
+                y=benchmark_portfolio_df.total_asset,
+                mode='lines',
+                name='Farmer Asset without investment ($)',
+                marker={
+                    'color':'cyan'
+                }
+            )
+        )
 
     fig.add_trace(
         go.Scatter(
@@ -146,7 +168,7 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
             y=portfolio_df['Alberta spot price'],
             yaxis='y2',
             mode='lines',
-            name='Benchmark ($)',
+            name='Wheat Spot price ($)',
             marker={
                 'color':'gray'
             }
@@ -178,9 +200,9 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
             'title': "Farmer ($)",
         },
         'yaxis2': {
-            'title': 'Benchmark ($)'
+            'title': 'Wheat Spot Price ($)'
         },
-        'height':700
+        'height':600
         # 'sliders':sliders
     }
 

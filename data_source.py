@@ -19,6 +19,10 @@ class MarketData:
     def get_price(self, adate, location='Alberta') -> float:
         last_price = self.price_df.loc[self.price_df.index <= adate].tail(1)[location].values[0]
         return last_price
+    
+    def get_price_df(self, adate, location='Alberta') -> pd.Series:
+        price_series = self.price_df.loc[self.price_df.index <= adate][location]
+        return price_series
 
 
 

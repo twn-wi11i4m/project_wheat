@@ -1,8 +1,24 @@
 import pandas as pd
 import numpy as np
 from util import get_datelist
+from KOICommonTools.GetDataClient import get_price
+
+def KOI_trading(start_date, end_date, tickers='RSC2 COMDTY'):
+    data = get_price(tickers, 'DAILY', '2017-01-01', use_df=True)[tickers]['NONE']
+    enter_date = data[data.index >= start_date].index[0]
+    exit_date = data[data.index >= end_date].index[0]
+    enter_type = 'MKT'
+
+    day_1_return = (data.loc[enter_date].PX_LAST - data.loc[enter_date].PX_OPEN)/data.loc[enter_date].PX_OPEN
+    r_df = data.pct_change().loc[(data.index >= enter_date) & (data.index <= exit_date)].PX_LAST
+    r_df.loc[enter_date] = day_1_return
+    r_df.name = 'daily_return'
+    return r_df
 
 class FinancialProduct:
+    """
+    Assume we only trade RSC2 COMDTY
+    """
     def __init__(self, invest_capital, initial_date, final_payoff_date) -> None:
         self.invest_capital = invest_capital
         self.initial_date = initial_date
@@ -18,8 +34,12 @@ class FinancialProduct:
 
     def _get_daily_return(self, date_list:list) -> pd.Series:
         np.random.seed(42)
-        fake_daily_return =  (np.random.random(len(date_list))-0.5)/10
-        return pd.Series(index=date_list, data=fake_daily_return, name='daily_return')
+        daily_return =  KOI_trading(self.initial_date, self.final_payoff_date)
+        df = pd.DataFrame(index=date_list)
+        df = df.join(daily_return)
+        df.fillna(0, inplace=True)
+        return df.daily_return
+ 
 
     @property
     def account_tradelog(self) -> pd.DataFrame:
@@ -36,6 +56,7 @@ class FinancialProduct:
 
 
 if __name__ == '__main__':
+    KOI_trading('2018-03-04', '2018-04-05')
     financial_product = FinancialProduct(100, '2020-01-01', '2020-05-04')
-    financial_product.account_tradelog()()
+    financial_product.account_tradelog
 
