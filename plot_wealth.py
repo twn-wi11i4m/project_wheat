@@ -198,6 +198,8 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
         },
         'yaxis': {
             'title': "Farmer ($)",
+            # 'layout_yaxis_range': [0,400000],
+            'range': [0, 120_000]
         },
         'yaxis2': {
             'title': 'Wheat Spot Price ($)'
@@ -207,6 +209,7 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
     }
 
     fig.update_layout(layout)
+    # fig.update_yaxes(range = [0,120_000])
 
     # fig.show()
     fig.write_html(os.path.join(res_path, f'farmer_{title}_{date_list[0]}_{date_list[-1]}_portfolio.html'))

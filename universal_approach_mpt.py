@@ -13,7 +13,14 @@ DEFAULT_MPT_CONFIG = {
 }
 
 
-def universal_approach_3_years_mpt(start_year=2018, end_year=2020, return_farmer_only=False, benchmark_farmer=None, mpt_config=DEFAULT_MPT_CONFIG):
+def universal_approach_3_years_mpt(
+    start_year=2018, 
+    end_year=2020, 
+    return_farmer_only=False, 
+    benchmark_farmer=None, 
+    mpt_config=DEFAULT_MPT_CONFIG,
+    financial_product_selection='naive'
+    ):
     farm = Farm(township=7, range=21, meridian=4, farm_area=1)
     farmer = Farmer(initial_cash=100_000, farm=farm)
     farmer.cost = {
@@ -83,7 +90,8 @@ def universal_approach_3_years_mpt(start_year=2018, end_year=2020, return_farmer
     previous_financial_product = FinancialProduct(
         invest_capital=100_000,
         initial_date=f'{start_year-1}-04-01',
-        final_payoff_date=f'{start_year-1}-10-30'
+        final_payoff_date=f'{start_year-1}-10-30',
+        selected_product=financial_product_selection
     )
     # we calculate the initial mpt weight
     mpt_weighter = MPT_Weighter(
@@ -115,7 +123,8 @@ def universal_approach_3_years_mpt(start_year=2018, end_year=2020, return_farmer
                 FinancialProduct(
                     invest_capital=invest_capital, 
                     initial_date=important_dates_dict[year]['purchase_financial_product_date'],
-                    final_payoff_date=important_dates_dict[year]['end_financial_product_date']
+                    final_payoff_date=important_dates_dict[year]['end_financial_product_date'],
+                    selected_product=financial_product_selection
                 )
             )
             farmer.cash_paid('invested capital', invest_capital)
@@ -180,7 +189,7 @@ def universal_approach_3_years_mpt(start_year=2018, end_year=2020, return_farmer
     if return_farmer_only:
         return farmer
     else:
-        fig = plot_portfolio(farmer, date_list, res_path='res_html', title=f'approach_mpt', sub_title=f"approach 2018 ratio: {d1}, 2019 ratio: {d2}, 2020 ratio:{d3} with mpt method: {mpt_config['method']}", benchmark_farmer=benchmark_farmer)
+        fig = plot_portfolio(farmer, date_list, res_path='res_html', title=f'approach_mpt', sub_title=f"approach 2018 ratio: {d1}, 2019 ratio: {d2}, 2020 ratio:{d3} with mpt method: {mpt_config['method']} | Financial Product: {financial_product_selection}", benchmark_farmer=benchmark_farmer)
     return fig
 
 if __name__ == "__main__":

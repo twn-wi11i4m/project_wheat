@@ -1,5 +1,6 @@
 import dash
 from dash import Dash, dcc, html, Input, Output, ctx
+# import dash_bootstrap_components as dbc
 from universal_approach import universal_approach_3_years
 from universal_approach_mpt import universal_approach_3_years_mpt
 from universal_approach_mpt_short import universal_approach_3_years_mpt_short
@@ -36,7 +37,7 @@ print()
 
 
 app = Dash(__name__, external_stylesheets=external_stylesheets)
-
+app.title = "Farmer Wealth Portfolio"
 
 app.layout = html.Div([
     html.Div(
@@ -46,6 +47,32 @@ app.layout = html.Div([
         # style={'width':"100%", 'height':"700px", 'display':'inline-block'}
         style={'width':"100%", 'height':"600px", 'display':'inline-block'}
     ),
+    html.Hr(
+        style={"color": "#FEC700"}
+        ),
+    html.Div(
+        [
+            html.Div(
+                [
+                    'Financial Product Selection:'
+                ],
+                style={'height':"10px", 'width':"15%", 'display':'inline-block'}
+            ),
+            html.Div(
+                [
+                    dcc.Dropdown(
+                        ['naive', 'Chagoi'], 
+                        'naive', 
+                        id='financial_product_selection'
+                    )
+                ],
+                style={'height':"10px", 'width':"15%", 'display':'inline-block'}
+            )
+        ]
+    ),
+    html.Hr(
+        style={"color": "#FEC700"}
+        ),
     html.Div(
         [
             dcc.Slider(0, 1, marks={0:{'label':'0'}, 0.5:{'label':'0.5'}, 1:{'label':'1'}}, value=0.5, id='2018-ratio'),
@@ -73,6 +100,9 @@ app.layout = html.Div([
         ],
         style={'width':"30%", 'height':"50px", 'display':'inline-block'}
     ),
+    html.Hr(
+        style={"color": "#FEC700"}
+        ),
     html.Div(
         [
             html.Button('MPT weight', id='mpt_weight', n_clicks=0),
@@ -95,6 +125,9 @@ app.layout = html.Div([
             ),
         ]
     ),
+    html.Hr(
+        style={"color": "#FEC700"}
+        ),
     html.Div(id='year_range'),
     html.Div(
         dcc.RangeSlider(
@@ -165,9 +198,10 @@ def display_value(value):
     Input('mpt_weight', 'n_clicks'),
     Input('mpt_weight_short', 'n_clicks'),
     Input('my-year-range-slider', 'value'),
+    Input('financial_product_selection', 'value')
     # Input('mpt_method', 'value'),
 )
-def update_output(value1, value2, value3, n_clicks_1, n_clicks_2, rn, mpt_method='min_volatility'):
+def update_output(value1, value2, value3, n_clicks_1, n_clicks_2, rn, fps='naive', mpt_method='min_volatility'):
     initial_cash_allocation={
         '2018': {
             'farming activity': 1-value1,
@@ -196,9 +230,12 @@ def update_output(value1, value2, value3, n_clicks_1, n_clicks_2, rn, mpt_method
             start_year=y_rn_start,
             end_year=y_rn_end,
             benchmark_farmer=benchmark_farmer,
-            mpt_config=mpt_config)
+            mpt_config=mpt_config,
+            financial_product_selection=fps
+            )
         print('done')
         print(f"Finish mpt result at {datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}")
+        print(f"financial product selection: {fps}")
         print()
         print()
         print()
@@ -215,9 +252,12 @@ def update_output(value1, value2, value3, n_clicks_1, n_clicks_2, rn, mpt_method
             start_year=y_rn_start,
             end_year=y_rn_end,
             benchmark_farmer=benchmark_farmer,
-            mpt_config=mpt_config)
+            mpt_config=mpt_config,
+            financial_product_selection=fps
+            )
         print('done')
         print(f"Finish mpt (with short) result at {datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}")
+        print(f"financial product selection: {fps}")
         print()
         print()
         print()
@@ -228,11 +268,14 @@ def update_output(value1, value2, value3, n_clicks_1, n_clicks_2, rn, mpt_method
             start_year=y_rn_start,
             end_year=y_rn_end,
             initial_cash_allocation=initial_cash_allocation,
-            benchmark_farmer=benchmark_farmer)
+            benchmark_farmer=benchmark_farmer,
+            financial_product_selection=fps
+            )
         # raise dash.exceptions.PreventUpdate
         
     # fig.layout.title = f"{value1}_{value2}"
     print(f"Finish result ({value1}, {value2}, {value3}) at {datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}")
+    print(f"financial product selection: {fps}")
     print(f"year range : {y_rn_start} {y_rn_end}")
     print()
     print()
