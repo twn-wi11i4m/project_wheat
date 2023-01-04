@@ -45,3 +45,55 @@ INITIAL_CASH_ALLOCATION = {
             'financial activity':0
         }
 }
+
+FARMING_ONLY_CASH_ALLOCATION = {
+    '2018':{
+        'w_1': 0.00,
+        'w_2': 1.00,
+        'w_3': 0.00,
+    },
+    '2019':{
+        'w_1': 0.00,
+        'w_2': 1.00,
+        'w_3': 0.00,
+    },
+    '2020':{
+        'w_1': 0.00,
+        'w_2': 1.00,
+        'w_3': 0.00,
+    },
+}
+
+HTML_FARM_FARMER_SESSION_BUTTON_STYLE = {
+    'width': '240px', 
+    'height': '28px', 
+    'cursor': 'pointer', 
+    'align': 'center',
+    'border-radius': '4px', 
+    'verticalAlign': 'center',
+    'margin-left': '4px',
+    'margin-right': '4px',
+    'paddingLeft': '2px',
+    'paddingRight': '2px',
+    'paddingTop':'0px',
+    'paddingBottom':'0px',
+    'text-align':'center',
+    'font-size': '9px'
+    }
+
+HTML_COST_SESSION_BUTTON_STYLE = {
+    'width': '140px', 
+    'height': '28px', 
+    'cursor': 'pointer', 
+    'align': 'center',
+    'border-radius': '4px', 
+    'verticalAlign': 'center',
+    'margin-left': '4px',
+    'margin-right': '4px',
+    'paddingLeft': '2px',
+    'paddingRight': '2px',
+    'paddingTop':'0px',
+    'paddingBottom':'0px',
+    'text-align':'center',
+    'font-size': '9px'
+    }

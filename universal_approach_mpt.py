@@ -189,7 +189,7 @@ def universal_approach_3_years_mpt(
     if return_farmer_only:
         return farmer
     else:
-        fig = plot_portfolio(farmer, date_list, res_path='res_html', title=f'approach_mpt', sub_title=f"approach 2018 ratio: {d1}, 2019 ratio: {d2}, 2020 ratio:{d3} with mpt method: {mpt_config['method']} | Financial Product: {financial_product_selection}", benchmark_farmer=benchmark_farmer)
+        fig = plot_portfolio(farmer, date_list, res_path='res_html', title=f'approach_mpt', sub_title=f"approach 2018 ratio: {d1}, 2019 ratio: {d2}, 2020 ratio:{d3} with mpt method: {mpt_config['method']} | Financial Product: {change_koi_name(financial_product_selection)}", benchmark_farmer=benchmark_farmer)
     return fig
 
 if __name__ == "__main__":

@@ -36,6 +36,14 @@ def bushel_to_metric_tonne(bushel, crop_type='wheat') -> float:
         metric_tonne = bushel * 0.0218
     return metric_tonne
 
+def change_koi_name(s) -> str:
+    """
+    display the koi model in public way
+    """
+    mapper = {
+        'Chagoi': 'KOI_product_v1'
+    }
+    return mapper.get(s,s) 
 
 
 

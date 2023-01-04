@@ -144,12 +144,36 @@ class AgriInsurance:
     def get_insurance_information(self): 
         print(f"Insurance information for {self.insured_acres} acres of {self.crop} at {self.coverage}% coverage:")
         print(f"Farm Location: mer {self.farm.meridian}, twn {self.farm.township}, rng {self.farm.range}, RA {self.farm.risk_area}")
-        if self.hail_endorsement == "Y":
+        if self.include_hail_endorsement:
             print("Farmer has elected for crop insurance with hail endorsement")
         else:
             print("Farmer has elected for crop insurance WITHOUT hail endorsement")
         print(f"The farmers estimated yield is: {self.get_yield_estimate()} bushels/acre, and yield guarantee is: {self.get_yield_guarantee()} bushels/acre")
         print(f"The farmers per/acre premium is: ${self.get_total_premium_per_acre()} and total premium is: ${self.get_total_premium()}" "\n")
+
+    def get_insurance_information_str(self, for_html=False): 
+        if for_html:
+            s = []
+            s.append(f"Insurance information for {self.insured_acres} acres of {self.crop} at {self.coverage}% coverage:")
+            s.append(f"Farm Location: mer {self.farm.meridian}, twn {self.farm.township}, rng {self.farm.range}, RA {self.farm.risk_area}")
+            if self.include_hail_endorsement:
+                s.append("Farmer has elected for crop insurance with hail endorsement")
+            else:
+                s.append("Farmer has elected for crop insurance WITHOUT hail endorsement")
+            s.append(f"The farmers estimated yield is: {self.get_yield_estimate()} bushels/acre, and yield guarantee is: {self.get_yield_guarantee()} bushels/acre")
+            s.append(f"The farmers per/acre premium is: ${self.get_total_premium_per_acre()} and total premium is: ${self.get_total_premium()}")
+            return s
+        else:
+            s = f"Insurance information for {self.insured_acres} acres of {self.crop} at {self.coverage}% coverage:\n"
+            s += f"Farm Location: mer {self.farm.meridian}, twn {self.farm.township}, rng {self.farm.range}, RA {self.farm.risk_area}\n"
+            
+            if self.include_hail_endorsement:
+                s += "Farmer has elected for crop insurance with hail endorsement\n"
+            else:
+                s += "Farmer has elected for crop insurance WITHOUT hail endorsement\n"
+            s += f"The farmers estimated yield is: {self.get_yield_estimate()} bushels/acre, and yield guarantee is: {self.get_yield_guarantee()} bushels/acre\n"
+            s += f"The farmers per/acre premium is: ${self.get_total_premium_per_acre()} and total premium is: ${self.get_total_premium()}\n"
+            return s
 
     def is_premium_pay_date(self, adate) -> bool:
         """

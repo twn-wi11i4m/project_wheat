@@ -27,11 +27,16 @@ def add_transaction_in_wealth_df(wealth_df:pd.DataFrame, cash_transaction_list) 
 
 def add_financial_account_balance_in_wealth_df(wealth_df:pd.DataFrame, financial_products:dict) -> pd.DataFrame:
     for (k,v) in financial_products.items():
-
+        if v is None:
+            # no financial product
+            continue
         wealth_df = wealth_df.join(v.account_tradelog.as_of_date_balance)
         wealth_df.rename(columns={'as_of_date_balance':f"{k}_balance"}, inplace=True)
     wealth_df.fillna(0, inplace=True)
-    wealth_df['total_balance'] =  wealth_df.loc[:, [f"{k}_balance" for k in financial_products.keys()]].sum(axis=1)
+    try:
+        wealth_df['total_balance'] =  wealth_df.loc[:, [f"{k}_balance" for k in financial_products.keys() if f"{k}_balance" in wealth_df.columns]].sum(axis=1)
+    except:
+        wealth_df['total_balance'] = 0
     wealth_df['total_asset'] = wealth_df.loc[:, ['farmer_cash', 'total_balance']].sum(axis=1)
     return wealth_df
 
@@ -160,7 +165,7 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
                 x=benchmark_portfolio_df.index,
                 y=benchmark_portfolio_df.total_asset,
                 mode='lines',
-                name='Farmer Asset without investment ($)',
+                name='Farmer Asset with ONLY farming ($)',
                 marker={
                     'color':'cyan'
                 }
@@ -181,7 +186,7 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
     )
 
     
-    plot_title = 'Farmer Risk Management & Wealth Portfolio'
+    plot_title = 'Farmer Risk Management & Wealth Portfolio Dash Board'
     layout = {
         'title':f"{plot_title}<br><sup>{sub_title}</sup>",
         'xaxis':{
@@ -204,12 +209,20 @@ def plot_portfolio(farmer, date_list:list, res_path:str, title:str, sub_title:st
         'yaxis': {
             'title': "Farmer ($)",
             # 'layout_yaxis_range': [0,400000],
-            'range': [0, 120_000]
+            # 'range': [0, 120_000]
+            'range': [0, wealth_df.total_asset.max() * 1.1]
         },
         'yaxis2': {
             'title': 'Wheat Spot Price ($)'
         },
-        'height':600
+        'height':600,
+        'legend': {
+            'orientation': "h",
+            # 'yanchor': "top",
+            # 'y': 0,
+            'xanchor': "right",
+            'x': 1,
+        }
         # 'sliders':sliders
     }
 
