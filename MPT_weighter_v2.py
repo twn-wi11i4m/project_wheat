@@ -127,7 +127,7 @@ class MPT_Weighter_v2:
 if __name__ == '__main__':
     market_data = MarketData()
     farm = Farm(township=7, range=21, meridian=4, farm_area=1)
-    farmer = Farmer(initial_cash=100_000, farm=farm)
+    farmer = Farmer_v2(initial_cash=100_000, farm=farm)
     farmer.cost = {
                 'Operational Cost': {
                     'Seed Treatment':34,
