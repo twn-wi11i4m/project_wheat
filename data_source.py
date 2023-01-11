@@ -119,3 +119,17 @@ class PremiumData:
         res = res.loc[res.coverage == coverage]
         percent_premium = round(res.premium.values[0] * 100, 2)
         return percent_premium
+
+
+
+class YieldHistoricalData:
+    def __init__(self) -> None:
+        p = pd.read_csv(os.path.join(DATA_SOURCE_FOLDER_PATH, 'Yield Data - wheat yields.csv'), index_col='Year')
+        p.index = pd.to_datetime(p.index.map(lambda x:f"{x}-12-31"))    # assume end of year
+        p = p[['Yield']]
+        self.p = p
+    
+    def get_yearly_yield_df(self, adate) -> pd.Series:
+        p_s = self.p.loc[self.p.index <= adate]
+        return p_s
+

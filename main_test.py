@@ -707,8 +707,8 @@ def update_output(
         DEFAULT_MPT_CONFIG = {
             'method': "min_volatility",
             'weight_bdd': {
-                'financial_product_return': {'max':0.1, 'min':0.0},   # 0
-                'spot_price_return': {'max':1, 'min':0.9},            # 1
+                'financial_product_return': {'max':0.35, 'min':0.05},   # 0
+                'spot_price_return': {'max':1, 'min':0.6},            # 1
                 'insurance_return': {'max':0.1, 'min':0.0},           # 2
             },
         }
